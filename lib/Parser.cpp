@@ -1,7 +1,6 @@
 #include "Parser.hpp"
 
-Parser::Parser(const std::string& html) {
-    _tokens = Tokenizer(html);
+Parser::Parser(const std::string& html) : _tokens(Tokenizer(html)) {
 }
 
 
