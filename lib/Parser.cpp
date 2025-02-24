@@ -29,7 +29,7 @@ static inline bool isSpace(char c){ // returns true if c is any form of whitespa
 }
 
 static inline bool isPunctuation(char c){ // returns true if c is punctuation (does NOT check for HTML punctuation) 
-    return c == ',' || c == '.' || c == '!' || c == '?' || c == ':' || c == ';' || c == '-';
+    return c == ',' || c == '.' || c == '!' || c == '?' || c == ':' || c == ';' || c == '-' || c == '\'' || c == '\"';
 }
 
 inline void Parser::pushWord(ParsingFlags flags, std::vector<std::string>& anchorText, std::string& currWord){
