@@ -23,7 +23,7 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-set(LIB_DIR "${CMAKE_SOURCE_DIR}/lib")
+set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 
 add_library(${THIS} STATIC ${LIB_DIR}/Parser.cpp ${LIB_DIR}/HtmlTags.cpp)
 target_include_directories(${THIS} PUBLIC ${LIB_DIR})
