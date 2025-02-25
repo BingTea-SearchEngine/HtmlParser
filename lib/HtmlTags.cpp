@@ -3,6 +3,7 @@
 #include <string>
 #include <cassert>
 #include <algorithm>
+
 #include "HtmlTags.h"
 
 // name points to beginning of the possible HTML tag name.

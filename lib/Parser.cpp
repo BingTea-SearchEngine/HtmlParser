@@ -1,8 +1,10 @@
-#include "Parser.hpp"
 #include <iostream>
 #include <algorithm>
 #include <cstring>
 #include <cctype>
+
+#include "Parser.hpp"
+#include "HtmlTags.h"
 
 std::vector<std::string> Parser::getWords(){
     return words;
