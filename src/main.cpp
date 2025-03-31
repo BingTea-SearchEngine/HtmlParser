@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "Parser.hpp"
+#include "../lib/Parser.hpp"
 
 using std::cout, std::endl;
 
@@ -64763,6 +64763,7 @@ Reference material, organized mostly as tables to help find answers fast.
 </html
 >
 
+
     )DELIM";
 
     Parser parser = Parser(html);
@@ -64795,4 +64796,6 @@ Reference material, organized mostly as tables to help find answers fast.
     cout << endl;
 
     cout << parser.getNumImages();
+	cout << endl;
+	cout << parser.getLanguage();
 }

@@ -26,6 +26,10 @@ int Parser::getNumImages(){
     return numImages;
 }
 
+std::string Parser::getLanguage(){
+    return language;
+}
+
 static inline bool isSpace(char c){ // returns true if c is any form of whitespace
     return(c == ' ' || c == '\t' || c == '\r' || c == '\n' || c == '\v' || c == '\f');
 }
@@ -76,25 +80,30 @@ void Parser::handleDiscardSection(size_t taglen){
     current = end;
 }
 
-void Parser::extractHref(std::string &out){
-// for <a> tags, extracts href = "url" and moves current to the end of the opening tag
-    std::string::iterator url = end;
-    std::string::iterator endUrl = end;
+void Parser::extractAttribute(std::string attributeName, std::string &out){
+    std::string::iterator attrValueStart = end;
+    std::string::iterator attrValueEnd = end;
 
-    for(; current < end && *current != '>'; current++){
-        if(end - current > 4 && *current == 'h' && std::equal(current, current + 4, "href")){
-            current += 4;
+    size_t attrLen = attributeName.size();
+
+    for(; current < end && *current != '>'; ++current){
+        if(static_cast<size_t>(std::distance(current, end)) >= attrLen 
+            && std::equal(attributeName.begin(), attributeName.end(), current)){
+
+            current += attrLen;
             for(; current < end && isSpace(*current); current++);
 
-            if(*current == '='){
+            if (current < end && *current == '=') {
                 current++;
-                for(; current < end && isSpace(*current); current++);
+                while (current < end && isSpace(*current)) {
+                    ++current;
+                }
 
                 if (current < end && (*current == '"' || *current == '\'')) {
                     char quoteType = *current++;
-                    url = current;
-                    endUrl = std::find(current, end, quoteType);
-                    if(endUrl != end){ // found a complete quote
+                    attrValueStart = current;
+                    attrValueEnd = std::find(current, end, quoteType);
+                    if (attrValueEnd != end) {
                         break;
                     }
                 }
@@ -102,41 +111,14 @@ void Parser::extractHref(std::string &out){
         }
     }
 
-    current = std::find(current, end, '>'); // Move to '>'
-    out = (url != end && endUrl != end) ? std::string(url, endUrl) : "";
-}   
+    current = std::find(current, end, '>');
 
-void Parser::extractSrc(std::string &out){
-    // extracts src = "url" and moves current to the end of the opening tag
-    std::string::iterator url = end;
-    std::string::iterator endUrl = end;
-
-    for(; current < end && *current != '>'; current++){
-        if(end - current > 3 && *current == 's' && std::equal(current, current + 3, "src")){
-            current += 3;
-            for(; current < end && isSpace(*current); current++);
-
-            if(*current == '='){
-                current++;
-                for(; current < end && isSpace(*current); current++);
-
-                if (current < end && (*current == '"' || *current == '\'')) {
-                    char quoteType = *current++;
-                    url = current;
-                    endUrl = std::find(current, end, quoteType);
-                    if(endUrl != end){ // found a complete quote
-                        break;
-                    }
-                }
-            }
-        }
+    if (attrValueStart != end && attrValueEnd != end) {
+        out = std::string(attrValueStart, attrValueEnd);
+    } else {
+        out.clear();
     }
-
-    current = std::find(current, end, '>'); // Move to '>'
-    out = (url != end && endUrl != end) ? std::string(url, endUrl) : "";
-}   
-
-
+}
 
 Parser::Parser(std::string& html){
     current = html.begin(); // set current and end
@@ -174,6 +156,16 @@ Parser::Parser(std::string& html){
             }
             else{
                 switch(action){
+                    case DesiredAction::Language: // <html> tag, search for a language, closing tag will automatically be ignored
+                        {
+                        std::string lang;
+                        extractAttribute("lang", lang);
+                        if(!lang.empty()){
+                            language = lang;
+                        }
+                        current = std::find(current, end, '>');
+                        break;
+                        }
                     case DesiredAction::Discard:
                         current = std::find(current, end, '>');
                         break;
@@ -226,7 +218,7 @@ Parser::Parser(std::string& html){
                         } 
                         else if(!flags.tagAnchor){
                             std::string href;
-                            extractHref(href);
+                            extractAttribute("href", href);
                             if(!href.empty()){ // Ignore anchors with no URL
                                 currURL.url = std::move(href);
                                 flags.tagAnchor = true;
@@ -234,7 +226,7 @@ Parser::Parser(std::string& html){
                         }
                         else{ // This acts like a closing for the current anchor and starts a new anchor
                             std::string href;
-                            extractHref(href);
+                            extractAttribute("href", href);
                             if(!href.empty()){
                                 links.push_back(std::move(currURL));
                                 currURL.url = std::move(href);
@@ -245,7 +237,7 @@ Parser::Parser(std::string& html){
                     case DesiredAction::Base:
                         if(!flags.baseFound){
                             std::string href;
-                            extractHref(href); // bases are self closing
+                            extractAttribute("href", href); // bases are self closing
                             if(!href.empty()){
                                 baseURL = {std::move(href),{}};
                                 flags.baseFound = true;
@@ -258,7 +250,7 @@ Parser::Parser(std::string& html){
 
                     case DesiredAction::Embed:{
                         std::string src;
-                        extractSrc(src); // embeds are self closing
+                        extractAttribute("src", src); // embeds are self closing
                         if(!src.empty()){
                             links.push_back({std::move(src), {}});
                         }

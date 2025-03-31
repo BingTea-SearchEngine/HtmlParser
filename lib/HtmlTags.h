@@ -31,7 +31,8 @@ enum class DesiredAction {
     Base,
     Embed,
     Emphasize,
-    Image
+    Image,
+    Language
 };
 
 // name points to beginning of the possible HTML tag name.
@@ -121,7 +122,7 @@ const HtmlTag TagsRecognized[] = {{"!--", DesiredAction::Comment},
                                   {"header", DesiredAction::Discard},
                                   {"hgroup", DesiredAction::Discard},
                                   {"hr", DesiredAction::Discard},
-                                  {"html", DesiredAction::Discard},
+                                  {"html", DesiredAction::Language},
                                   {"i", DesiredAction::Discard},
                                   {"iframe", DesiredAction::Discard},
                                   {"img", DesiredAction::Image},

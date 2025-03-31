@@ -40,14 +40,15 @@ public:
     // Get the number of images
     int getNumImages();
 
+    std::string getLanguage();
+
 private:
     std::string::iterator current;
     std::string::iterator end;
 
     // Helper functions
     void handleDiscardSection(size_t taglen);
-    void extractHref(std::string &out);
-    void extractSrc(std::string &out);
+    void extractAttribute(std::string attributeName, std::string &out);
     void pushWord(ParsingFlags flags, std::vector<std::string>& anchorText, std::string& currWord);
 
     // Data
@@ -55,4 +56,5 @@ private:
     std::vector<URL> links;
     URL baseURL;
     int numImages;
+    std::string language = "en"; // language defaults to english
 };
